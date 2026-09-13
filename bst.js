@@ -132,32 +132,87 @@ class Tree{
         }
     }
 
-    inOrderForEach(callback){
-
+    inOrderForEach(callback, node = this.root){
+        if(!callback){
+            throw new Error('Callback funtion required.');
+        }
+        if(node === null) return;
+        this.preOrderForEach(callback, node.left);
+        callback(node.data);
+        this.preOrderForEach(callback, node.right);
     }
 
-    preOrderForEach(callback){
-
+    preOrderForEach(callback, node = this.root){
+        if(!callback){
+            throw new Error('Callback funtion required.');
+        }
+        if(node === null) return;
+        callback(node.data);
+        this.preOrderForEach(callback, node.left);
+        this.preOrderForEach(callback, node.right);
     }
 
-    postOrderForEach(callback){
-
+    postOrderForEach(callback, node = this.root){
+        if(!callback){
+            throw new Error('Callback funtion required.');
+        }
+        if(node === null) return;
+        this.preOrderForEach(callback, node.left);
+        this.preOrderForEach(callback, node.right);
+        callback(node.data);
     }
 
     height(value){
-
+        const targetNode = this.findNode(value);
+        if (targetNode === null) return -1;
+        
+        return this.getHeight(targetNode);
     }
 
-    depth(value){
+    // Helper function to find a node, slightly different than includes()
+    findNode(value, node = this.root){
+        if(node === null) return null;
+        if(node.data === value) return node;
 
+        if(value < node.data) return this.findNode(value, node.left);
+        else return this.findNode(value, node.right); 
     }
 
-    isBalanced(){
+    // Helper function to get height
+    getHeight(node){
+        if(node === null) return -1;
 
+        let leftCount = this.getHeight(node.left);
+        let rightCount = this.getHeight(node.right);
+
+        return Math.max(leftCount, rightCount) + 1;
+    }
+
+    depth(value, node = this.root, currentDepth = 0){
+        if(node === null) return;
+        if(node.data === value) return currentDepth;
+
+        if(value < node.data) return this.depth(value, node.left, currentDepth + 1);
+        if(value > node.data) return this.depth(value, node.right, currentDepth + 1);
+    }
+
+    isBalanced(node = this.root){
+        if(node === null) return true;
+        let leftHeight = this.getHeight(node.left);
+        let rightHeight = this.getHeight(node.right);
+        
+        let diff = Math.abs(leftHeight - rightHeight);
+        if(diff > 1) return false;
+        else return this.isBalanced(node.left) && this.isBalanced(node.right);
     }
 
     rebalance(){
+        const newArr = [];
+        this.inOrderForEach((value) => newArr.push(value));
+        const cleanArr = [...new Set(newArr)];
+        const sorted = mergeSort(cleanArr);
 
+        this.root = this.buildTree(sorted);
     }
 }
 
